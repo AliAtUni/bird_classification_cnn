@@ -12,8 +12,8 @@ def train(model: nn.Module,
           train_loader: DataLoader,
           test_loader: DataLoader,
           num_classes: int = 525,
-          device: str = " cuda",
-          epochs: int = 10, 
+          device: str = "cuda",
+          epochs: int = 5, 
           experiment_name: str = "Bird_Classification") -> None:
     """
     Trains the bird classification model, tracks the training process using MLflow and TensorBoard,
@@ -85,6 +85,10 @@ def train(model: nn.Module,
 
         # Save the trained model for later inference
         model_save_path = os.path.join('models', 'bird_classification_model.pth')
+
+        # Check if the directory exists, and if not, create it
+        os.makedirs(os.path.dirname(model_save_path), exist_ok=True)
+
         torch.save(model.state_dict(), model_save_path)
         print(f'Model saved to {model_save_path}')
 

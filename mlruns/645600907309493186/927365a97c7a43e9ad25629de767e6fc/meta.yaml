@@ -1,0 +1,15 @@
+artifact_uri: file:///home/student/bird_classification_cnn/mlruns/645600907309493186/927365a97c7a43e9ad25629de767e6fc/artifacts
+end_time: 1713134587709
+entry_point_name: ''
+experiment_id: '645600907309493186'
+lifecycle_stage: active
+run_id: 927365a97c7a43e9ad25629de767e6fc
+run_name: classy-crow-386
+run_uuid: 927365a97c7a43e9ad25629de767e6fc
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1713129950107
+status: 4
+tags: []
+user_id: student
