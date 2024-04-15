@@ -32,8 +32,8 @@ def main():
     # model.save(model_path)
     # print(f"Model saved at {model_path}")
 
-    # # Evaluate the model on the test set
-    # evaluate(model_path, test_dir)
+    # Evaluate the model on the test set
+    evaluate(model_path, test_dir)
 
 if __name__ == '__main__':
     main()

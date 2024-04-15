@@ -7,31 +7,22 @@ from src.model import build_model, get_optimizer, get_loss_function
 from torch.utils.tensorboard import SummaryWriter
 import os
 
-
 def train(model: nn.Module, 
           train_loader: DataLoader,
           test_loader: DataLoader,
           num_classes: int = 525,
           device: str = "cuda",
-          epochs: int = 5, 
+          epochs: int = 1, 
           experiment_name: str = "Bird_Classification") -> None:
     """
     Trains the bird classification model, tracks the training process using MLflow and TensorBoard,
     and saves the model for later inference.
-
-    Args:
-        train_loader (DataLoader): DataLoader for the training dataset.
-        test_loader (DataLoader): DataLoader for the test dataset.
-        num_classes (int): Number of classes in the dataset. Default is 525.
-        epochs (int): Number of epochs to train the model. Default is 10.
     """
     # Set up MLflow tracking
     mlflow.set_experiment(experiment_name)
 
-    # Build the model
+    # Set device and build the model
     model = model.to(device)
-
-    # Define training parameters
     optimizer = get_optimizer(model)
     criterion = get_loss_function()
 
@@ -40,6 +31,8 @@ def train(model: nn.Module,
 
     # Start an MLflow run
     with mlflow.start_run():
+        mlflow.log_params({"num_classes": num_classes, "epochs": epochs, "device": device})
+        
         for epoch in range(epochs):
             model.train()
             running_loss = 0.0
@@ -52,14 +45,14 @@ def train(model: nn.Module,
                 optimizer.step()
                 running_loss += loss.item()
 
-                # Log training loss for each batch
+                # Log training loss for each batch in TensorBoard and MLflow
                 writer.add_scalar('Batch/Training Loss', loss.item(), epoch * len(train_loader) + batch_idx)
+                mlflow.log_metric('Batch/Training Loss', loss.item(), step=epoch * len(train_loader) + batch_idx)
 
-            # Log average training loss for the epoch
             avg_train_loss = running_loss / len(train_loader)
             writer.add_scalar('Epoch/Average Training Loss', avg_train_loss, epoch)
+            mlflow.log_metric('Epoch/Average Training Loss', avg_train_loss, step=epoch)
 
-            # Evaluate the model on the test set
             model.eval()
             test_loss = 0.0
             correct = 0
@@ -74,23 +67,22 @@ def train(model: nn.Module,
                     total += labels.size(0)
                     correct += (predicted == labels).sum().item()
 
-            # Log test loss and accuracy for the epoch
             avg_test_loss = test_loss / len(test_loader)
             test_accuracy = correct / total
             writer.add_scalar('Epoch/Test Loss', avg_test_loss, epoch)
             writer.add_scalar('Epoch/Test Accuracy', test_accuracy, epoch)
+            mlflow.log_metrics({
+                'Epoch/Test Loss': avg_test_loss,
+                'Epoch/Test Accuracy': test_accuracy
+            }, step=epoch)
 
-            # Print epoch summary
             print(f'Epoch {epoch+1}/{epochs}, Training Loss: {avg_train_loss:.4f}, Test Loss: {avg_test_loss:.4f}, Test Accuracy: {test_accuracy:.4f}')
 
-        # Save the trained model for later inference
+        # Save the trained model for later inference and log the model in MLflow
         model_save_path = os.path.join('models', 'bird_classification_model.pth')
-
-        # Check if the directory exists, and if not, create it
         os.makedirs(os.path.dirname(model_save_path), exist_ok=True)
-
         torch.save(model.state_dict(), model_save_path)
-        print(f'Model saved to {model_save_path}')
+        mlflow.pytorch.log_model(model, "model")
 
-        # Close the TensorBoard writer
+        print(f'Model saved to {model_save_path}')
         writer.close()

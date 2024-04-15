@@ -1,0 +1,15 @@
+artifact_uri: file:///home/student/bird_classification_cnn/mlruns/645600907309493186/11032dc655644a5b8123e20e54c02ef4/artifacts
+end_time: 1713213986845
+entry_point_name: ''
+experiment_id: '645600907309493186'
+lifecycle_stage: active
+run_id: 11032dc655644a5b8123e20e54c02ef4
+run_name: upbeat-wolf-644
+run_uuid: 11032dc655644a5b8123e20e54c02ef4
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1713211351796
+status: 3
+tags: []
+user_id: student
