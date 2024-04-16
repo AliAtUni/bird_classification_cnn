@@ -3,14 +3,179 @@
 
 <head>
     <title>Upload new File</title>
+    <!-- Include Bootstrap for styling (optional) -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        body,
+        html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(270deg, #104D73, #082640);
+            background-size: 200% 200%;
+            animation: AnimationName 10s ease infinite;
+        }
+
+        @keyframes AnimationName {
+            0% {
+                background-position: 0% 51%
+            }
+
+            50% {
+                background-position: 100% 50%
+            }
+
+            100% {
+                background-position: 0% 51%
+            }
+        }
+
+        body {
+            padding: 50px;
+        }
+
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #f4f4f4;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.4);
+            position: relative;
+        }
+
+        .container * {
+            margin: 20px auto;
+        }
+
+        .drop-area {
+            height: 100px;
+            border: 2px dashed #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            /* margin: 10px; */
+            cursor: pointer;
+        }
+
+        .drop-area.hover {
+            background-color: lightblue;
+            border-color: blue;
+        }
+
+        .btn-blocka {
+            /* display: block; */
+            width: 130px;
+            margin: 0px;
+            /* Makes the button stretch to fill the container */
+            /* box-sizing: border-box; */
+            /* Includes padding and border in the element's total width */
+        }
+    </style>
 </head>
 
 <body>
-    <h1>Upload new File</h1>
-    <form action="/" method=post enctype=multipart/form-data>
-        <input type=file name=file>
-        <input type=submit value=Upload>
-    </form>
+    <div class="container">
+        <h1 class="text-center">Bird Classification Lab</h1>
+        <h6 class="text-center">Made with Love, Ali and Omar</h6>
+        <hr>
+        <h5>Upload an image to Predict!</h5>
+        <form id="uploadForm" method="post" enctype="multipart/form-data">
+            <div class="drop-area" id="drop-area">
+                <p style="opacity: 50%;">Drop an image, or click to select an image</p>
+                <input type="file" id="fileElem" multiple accept="image/*" class="form-control-file" name="file"
+                    style="display:none">
+            </div>
+            <button type="submit" class="btn btn-success btn-blocka">Upload</button>
+        </form>
+
+    </div>
+    <br><br>
+    <div id="resultCont" class="container" style="display: none;">
+        <div id="result" class="mt-3" style="display: none;">
+            <h5>Our model predicted the breed to be:</h5>
+            <h1 class="text-center" id="prediction"></h1>
+        </div>
+    </div>
+
+    <!-- JavaScript to handle the form submission and drag and drop -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var dropArea = document.getElementById('drop-area');
+            var fileElem = document.getElementById('fileElem');
+
+            dropArea.addEventListener('click', function () {
+                fileElem.click();
+            });
+
+            dropArea.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                dropArea.classList.add('hover');
+            });
+
+            dropArea.addEventListener('dragleave', function (e) {
+                dropArea.classList.remove('hover');
+            });
+
+            dropArea.addEventListener('drop', function (e) {
+                e.preventDefault();
+                dropArea.classList.remove('hover');
+                var files = e.dataTransfer.files;
+                handleFiles(files);  // Handle files for display
+                fileElem.files = files; // Attempt to set file input (may not be necessary)
+            });
+
+            fileElem.addEventListener('change', function () {
+                handleFiles(fileElem.files);
+            });
+
+            function handleFiles(files) {
+                if (files.length) {
+                    var img = document.createElement("img");
+                    img.src = URL.createObjectURL(files[0]);
+                    img.height = 100; // Adjust size as needed
+                    img.onload = function () {
+                        URL.revokeObjectURL(this.src);
+                    }
+                    dropArea.innerHTML = ''; // Clear previous content
+                    dropArea.appendChild(img);
+                }
+            }
+
+            $('#uploadForm').on('submit', function (e) {
+                e.preventDefault();
+                var formData = new FormData();
+                var files = fileElem.files;
+                if (files.length > 0) {
+                    formData.append('file', files[0]); // Manually add the file to FormData
+                } else {
+                    alert("No file selected.");
+                    return;
+                }
+
+                $.ajax({
+                    url: '/',
+                    type: 'POST',
+                    data: formData,
+                    success: function (data) {
+                        $('#result').show();
+                        $('#resultCont').show();
+                        $('#prediction').text(data.result);
+                    },
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    error: function (xhr, status, error) {
+                        console.error("Upload failed with status: " + status + ". Error: " + error);
+                    }
+                });
+            });
+        });
+    </script>
+
 </body>
 
 </html>

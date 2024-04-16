@@ -11,7 +11,6 @@ with open('int_class_id_to_label.json', 'r') as f:
     label_map = json.load(f)
 
 
-
 app = Flask(__name__)
 
 # Load your trained model (adjust according to your actual setup)
